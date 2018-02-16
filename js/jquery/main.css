@@ -1,0 +1,54 @@
+
+
+		
+/*------------------ selectBox -----------------*/
+
+.selectBox{
+		font-family:Verdana, Arial, Helvetica, sans-serif;
+		font-size:12px;
+		background:url("../../images/images/fruitsBackground.jpg") no-repeat top right;
+		height:25px;
+		width:155px;
+		}
+
+.selectBox .passiveSelect,.selectBox .activeSelect{
+		height:25px;
+		display:block;
+		cursor:pointer;	
+		padding-left:0px;
+		padding-top:6px;
+		color:#000000;
+		font-size:11px;
+		}
+		
+
+		
+.selectBox ul{
+		padding:0;
+		margin:0;
+		list-style:none;
+		overflow-x: hidden;
+		overflow-y: auto;
+		cursor:pointer;
+		width:150px;
+		padding:3px;
+		background:#5a5a5a;
+		}
+		
+.selectBox li{
+		padding:0;
+		margin:0;
+		width:150px;
+		color:#fff;
+		display:block;
+		float:left;
+		padding:3px;
+		}
+	
+.selectBox  .special{
+		font-weight:bold;
+		}
+		
+.selectBox .selected,.selectBox li:hover{
+		color:#999999;
+		}

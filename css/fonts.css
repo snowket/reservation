@@ -1,0 +1,34 @@
+
+@font-face {
+    font-family: "nino";
+    font-style: normal;
+    font-weight: normal;
+    src: url("fonts/nino/bpg_nino_mtavruli_normal-webfont.eot?#iefix") format("embedded-opentype"), url("fonts/nino/bpg_nino_mtavruli_normal-webfont.woff") format("woff"), url("fonts/nino/bpg_nino_mtavruli_normal-webfont.ttf") format("truetype"), url("fonts/nino/bpg_nino_mtavruli_normal-webfont.svg#BPGNinoMtavruliRegular") format("svg");
+}
+@font-face {
+    font-family: "nino_bold";
+    font-style: normal;
+    font-weight: normal;
+    src: url("fonts/nino_bold/bpg_nino_mtavruli_bold-webfont.eot?#iefix") format("embedded-opentype"), url("fonts/nino_bold/bpg_nino_mtavruli_bold-webfont.woff") format("woff"), url("fonts/nino_bold/bpg_nino_mtavruli_bold-webfont.ttf") format("truetype"), url("fonts/nino_bold/bpg_nino_mtavruli_bold-webfont.svg#bpg_nino_mtavrulibold") format("svg");
+}
+@font-face {
+    font-family: "ariali";
+    font-style: normal;
+    font-weight: normal;
+    src: url("fonts/bpg_arial/bpg_ingiri_arial_2008-webfont.eot?#iefix") format("embedded-opentype"), url("fonts/bpg_arial/bpg_ingiri_arial_2008-webfont.woff") format("woff"), url("fonts/bpg_arial/bpg_ingiri_arial_2008-webfont.ttf") format("truetype"), url("fonts/bpg_arial/bpg_ingiri_arial_2008-webfont.svg#bpg_ingiri_arial_2008regular") format("svg");
+}
+
+
+
+.caps{
+    font-family: 'nino',Arial,Verdana;
+    font-size: 12px;
+}
+.caps_bold{
+    font-family: 'nino_bold',Arial,Verdana;
+    font-size: 12px;
+}
+.regular{
+    font-family: 'ariali',Arial,Verdana;
+    font-size: 12px;
+}

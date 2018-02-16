@@ -1,0 +1,16 @@
+A-Accommodation Price
+B(%)-Accommodation Discount
+FOOD-Food Price
+C(%)-One Person Discount
+D(%)-Pay Now Discount
+E-Daily Discount
+F(%)-Individual Discount
+G(%)-Tax Free Discount
+H-Daily Total Price
+
+Guest H=(A+FOOD)-B(%)-C(%)-D(%)-F(%)-E-G(%)
+Affiliate H=(A+FOOD)-B(%)-C(%)-D(%)-F(%)-G(%)
+
+Guest H=A-B(%)-FOOD-C(%)-D(%)-F(%)-E-G(%)
+Affiliate H=A-B(%)+FOOD-C(%)-D(%)-F(%)-G(%)
+

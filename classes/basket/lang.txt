@@ -1,0 +1,25 @@
+/*LANG::
+
+text['geo'][''] = '';
+text[''] = '';
+text[''] = '';
+text[''] = '';
+text[''] = '';
+text[][''] = '';
+
+
+class LANG{
+  private static $text = array(
+     'a' => 'sdfsdf',
+  
+  );
+  
+  public static __call($k){
+    if(isset(self::text[$k])) return self::text[$k];
+    return '';
+  }
+  
+
+}
+LANG::$a
+*/

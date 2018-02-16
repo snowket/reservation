@@ -1,0 +1,111 @@
+#cssmenu {
+    border: 0 none;
+    color: #3a82cc;
+    font-family: Verdana,Arial;
+    font-size: 11px;
+    text-decoration: none;
+    margin: 0;
+    padding: 0;
+    width: auto;
+}
+#cssmenu > ul {
+    margin-top: 2px !important;
+}
+#cssmenu ul {
+    #border-left: 1px solid #ff8d39;
+    #border-right: 1px solid #ff8d39;
+    #border-top: 1px solid #ff8d39;
+    border-bottom: 1px solid #ff8d39;
+
+    height: 22px;
+    list-style: outside none none;
+    margin: 0;
+    padding: 0;
+}
+#cssmenu ul ul {
+    #border-top: 1px solid #ff8d39;
+    box-shadow: none;
+}
+#cssmenu ul ul a {
+    line-height: 22px;
+}
+#cssmenu ul ul ul {
+    left: 100%;
+    top: 0;
+}
+#cssmenu li {
+    float: left;
+    padding: 0 2px;
+
+}
+#cssmenu li a {
+    border-left: 1px solid #cbcbcb;
+    border-right: 1px solid #cbcbcb;
+    border-top: 1px solid #cbcbcb;
+    border-bottom: 1px solid #ffffff;
+    color: #3a82cc;
+    display: block;
+    line-height: 20px;
+    padding: 0 25px;
+    text-align: center;
+    text-decoration: none;
+}
+#cssmenu li a:hover {
+    /*color: #FFF;
+    text-decoration: none;
+    background-color:#ff8d39 ;*/
+}
+#cssmenu li ul {
+    background: #e0e0e0 none repeat scroll 0 0;
+    border-bottom: 1px solid #ff8d39 ;
+    #border-left: 1px solid #ff8d39 ;
+    #border-right: 1px solid #ff8d39 ;
+    display: none;
+    height: auto;
+    opacity: 0.95;
+    position: absolute;
+    #width: 225px;
+    z-index: 200;
+}
+#cssmenu li:hover > ul {
+    display: block;
+}
+#cssmenu li li {
+    display: block;
+    float: none;
+    padding: 0;
+    position: relative;
+    min-width: 100px;
+}
+#cssmenu li ul a {
+    background: #FFF;
+    display: block;
+    font-size: 11px;
+    font-style: normal;
+    padding: 0 10px 0 15px;
+    text-align: left;
+}
+#cssmenu li ul a:hover {
+    color: #FFF;
+    text-decoration: none;
+    background-color:#ff8d39 ;
+    opacity: 1;
+}
+#cssmenu p {
+    clear: left;
+}
+#cssmenu .active > a {
+    border-left: solid #cbcbcb 1px;
+    border-top:  solid #e68b2c 2px;
+    border-right: solid #cbcbcb 1px;
+    border-bottom: solid #ffffff 1px;
+
+
+
+   // background: #ff8d39  none repeat scroll 0 0;
+   // box-shadow: 0 -4px 0 #ff8d39, 0 -5px 0 #ff8d39, 0 -6px 0 #ff8d39;
+    //color: #ffffff;
+}
+#cssmenu .active > a:hover {
+    //color: white;
+}

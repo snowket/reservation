@@ -1,0 +1,45 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>{#convertor.title}</title>
+    <script language="javascript" type="text/javascript" src="../../tiny_mce_popup.js"></script>
+	<script language="javascript" type="text/javascript" src="jscripts/functions.js"></script>
+</head>
+<body>
+ <form action="" method="post">
+ <table cellpadding="0" cellspacing="0" border="0">
+ <tr>
+  <td>
+    from
+    <select name=charset1 size=1>
+       <option selected>_eng_</option>
+       <option>_standart_</option>
+       <optiond>_utf8_</option>
+       <option>Manuchari</option>
+       <option>racxa</option>
+       <option>GeoFinder</option>
+    </select>&nbsp;&nbsp;
+     to
+ 	<select name=charset2 size=1>
+ 	<option>_eng_</option>
+ 	<option>_standart_</option>
+ 	<option selected>_utf8_</option>
+ 	<option>Manuchari</option>
+ 	<option>racxa</option>
+ 	<option>GeoFinder</option>
+ 	</select>
+  </td>
+ </tr>
+ <tr>
+    <td>
+       <textarea name="sourse" style="width:450px;height:230px"></textarea>
+    </td>
+ </tr> 
+ <tr>
+    <td align="right">
+       <input type="button" value="Convert" onclick="doConvert()">
+    </td>
+ </tr>
+ </form>
+</body>
+</html>

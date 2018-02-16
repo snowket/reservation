@@ -1,0 +1,56 @@
+.tablesorterPager {
+    position: relative;
+	padding: 4px;
+	background-color: #FFF;
+	text-align: center;
+    margin-top:5px;
+    margin-left: auto;
+    margin-right: auto;
+    border: solid #cdcdcd 2px;
+
+}
+
+.tablesorterPager .first {
+	width: auto;
+	margin-right: 4px;
+    margin-top:2px;
+    float:left;
+}
+
+.tablesorterPager .prev {
+    width: auto;
+    margin-right: 4px;
+    margin-top:2px;
+    float:left;
+}
+.tablesorterPager .next {
+	width: auto;
+	margin-left: 4px;
+    margin-top:2px;
+    float:left;
+}
+
+.tablesorterPager .last {
+    width: auto;
+    margin-left: 4px;
+    margin-top:2px;
+    float:left;
+}
+
+.tablesorterPager .pagedisplay {
+	font-size: 12px;
+	width: 50px;
+	border: 1px solid #cdcdcd;
+	text-align: center;
+    float:left;
+
+}
+
+.tablesorterPager .pagesize {
+    font-size: 12px;
+    width: 50px;
+    border: 1px solid #cdcdcd;
+    text-align: center;
+    margin-lefT:4px;
+    float:left;
+}
