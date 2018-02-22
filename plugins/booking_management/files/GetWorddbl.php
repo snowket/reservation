@@ -5,7 +5,7 @@ $rate=(isset($_GET['rate']) && $_GET['rate']!='')?$_GET['rate']:1;
 $count=(isset($_GET['count']) && $_GET['count']!='')?$_GET['count']:1;
 $opt=(isset($_GET['opt']) && $_GET['opt']!='')?$_GET['opt']:'GEL';
 function convertGelTo($gel, $rate,$count){
-    return number_format($gel/$rate*$count,4,'.','');
+    return number_format($gel/$rate*$count,2,'.','');
 }
 $phpWord = new \PhpOffice\PhpWord\PhpWord();
 $section = $phpWord->addSection(array('pageSizeH'=>18000,'marginTop'=>500));
@@ -53,6 +53,7 @@ $table->addCell(null, $styleCell)->addText(($guest['tax']==0)?"TAX FREE":"TAX IN
 
 
 
+$total_paid=0;
 $total_price=0;
 $breack=0;
 foreach($bookings AS $booking) {
@@ -62,8 +63,8 @@ foreach($bookings AS $booking) {
     $booking['services_paid_amount']=convertGelTo($booking['services_paid_amount'],$rate,$count);
 
     $breack++;
-    $booking_total_price = 0;
-    $booking_total_paid = 0;
+    $booking_total_price = $booking['accommodation_price'] + $booking['services_price'];
+    $booking_total_paid =  $booking['services_paid_amount'] + $booking['paid_amount'];
     $section->addTextBreak(1,array('size'=>'2'));
     $table = $section->addTable(array('width' => 100*50, 'unit' => 'pct','borderSize' => 6, 'borderColor' => '006699', 'cellMargin' => 80,'exactHeight'));
     $table->addRow(320,$rowStyle);
@@ -83,57 +84,37 @@ foreach($bookings AS $booking) {
     $table->addRow(320,$rowStyle);
     $table->addCell(null, $styleCell)->addText($TEXT['invoice']['guests'], $fontStyle);
     $table->addCell(null, array('align'=>'right'))->addText($booking['dls'], $fontStyle);
-    $section->addTextBreak(1,array('size'=>'2'));
-    $table = $section->addTable(array('width' => 100*50, 'unit' => 'pct','borderSize' => 6, 'borderColor' => '006699', 'cellMargin' => 80,'exactHeight'));
     $table->addRow(320,$rowStyle);
     $table->addCell(null, array('bgColor'=>'999999'))->addText($TEXT['invoice']['price_calculation'], $fontStyle);
     $table->addCell(null, array('bgColor'=>'999999'))->addText("ფასი (".$opt.")", $fontStyle);
-
-
-
-    if(isset($invoices[$booking['id']]['a'])&&$invoices[$booking['id']]['a']=="on") {
-        $booking_total_price = floatval($booking['accommodation_price']);
-        $booking_total_paid = floatval($booking['paid_amount']);
-        $table->addRow(320,$rowStyle);
-        $table->addCell(null, $styleCell)->addText($TEXT['invoice']['total_accommodation_price'], $fontStyle);
-        $table->addCell(null, array('align'=>'right'))->addText($booking['accommodation_price'], $fontStyle);
-        if($guest['tax']==1){
-            $table->addRow(320,$rowStyle);
-            $table->addCell(null, $styleCell)->addText($TEXT['invoice']['tax_price'], $fontStyle);
-            $table->addCell(null, array('align'=>'right'))->addText(number_format((((floatval($booking['accommodation_price']))/118)*18),2,"."," "), $fontStyle);
-        }else{
-            $table->addRow(320,$rowStyle);
-            $table->addCell(null, $styleCell)->addText($TEXT['invoice']['tax_price'], $fontStyle);
-            $table->addCell(null, array('align'=>'right'))->addText('0', $fontStyle);
-        }
-    }
-    if(isset($invoices[$booking['id']]['s'])&&$invoices[$booking['id']]['s']=="on") {
-        $booking_total_price += floatval($booking['services_price']);
-        $booking_total_paid += floatval($booking['services_paid_amount']);
-        $table->addRow(320,$rowStyle);
-        $table->addCell(null, $styleCell)->addText($TEXT['invoice']['services_total_price'], $fontStyle);
-        $table->addCell(null, array('align'=>'right'))->addText($booking['services_price'], $fontStyle);
-
-    }
-    if(isset($invoices[$booking['id']]['a']) && $invoices[$booking['id']]['a']=="on" && isset($invoices[$booking['id']]['s']) && $invoices[$booking['id']]['s']=="on"){
-        $table->addRow(320,$rowStyle);
-        $table->addCell(null, $styleCell)->addText($TEXT['invoice']['total_price'], $fontStyle);
-        $table->addCell(null, array('align'=>'right'))->addText($booking_total_price, $fontStyle);
-    }
-    $table->addRow(320,$rowStyle);
-    $table->addCell(null, $styleCell)->addText($TEXT['invoice']['the_amount_paid'], $fontStyle);
-    $table->addCell(null, array('align'=>'right'))->addText($booking['accommodation_price'], $fontStyle);
     $table->addRow(320,$rowStyle);
     $table->addCell(null, $styleCell)->addText($TEXT['invoice']['amount_due'], $fontStyle);
-    if(empty($transaction[$booking['id']])){
-      $table->addCell(null, array('align'=>'right'))->addText(0, $fontStyle);
-    }else{
-      $table->addCell(null, array('align'=>'right'))->addText($transaction[$booking['id']], $fontStyle);
-    }
+    $table->addCell(null, array('align'=>'right'))->addText($booking['accommodation_price'], $fontStyle);
+    $table->addRow(320,$rowStyle);
+    $table->addCell(null, $styleCell)->addText($TEXT['invoice']['services_total_price'], $fontStyle);
+    $table->addCell(null, array('align'=>'right'))->addText($booking['services_price'], $fontStyle);
+    $table->addRow(320,$rowStyle);
+    $table->addCell(null, $styleCell)->addText($TEXT['invoice']['the_amount_paid'], $fontStyle);
+    $table->addCell(null, array('align'=>'right'))->addText($booking_total_paid, $fontStyle);
 
-
-    $total_price+=($booking_total_price-$booking_total_paid);
+    $total_price+=$booking_total_price;
+    $total_paid+=$booking_total_paid;
 }
+
+$section->addTextBreak(1,array('size'=>'2'));
+$table = $section->addTable(array('width' => 100*50, 'unit' => 'pct','borderSize' => 6, 'borderColor' => '006699', 'cellMargin' => 80));
+$table->addRow(320,$rowStyle);
+$table->addCell(null, array('bgColor'=>'999999'))->addText($TEXT['invoice']['price_calculation'], $fontStyle);
+$table->addCell(null, array('bgColor'=>'999999'))->addText("ფასი (".$opt.")", $fontStyle);
+$table->addRow(320,$rowStyle);
+$table->addCell(null, $styleCell)->addText($TEXT['invoice']['total_price'], $fontStyle);
+$table->addCell(null, array('align'=>'right'))->addText($total_price, $fontStyle);
+$table->addRow(320,$rowStyle);
+$table->addCell(null, $styleCell)->addText($TEXT['invoice']['the_amount_paid'], $fontStyle);
+$table->addCell(null, array('align'=>'right'))->addText($total_paid, $fontStyle);
+$table->addRow(320,$rowStyle);
+$table->addCell(null, $styleCell)->addText($TEXT['invoice']['amount_due'], $fontStyle);
+$table->addCell(null, array('align'=>'right'))->addText($total_price-$total_paid, $fontStyle);
 
 $section->addTextBreak(1,array('size'=>'2'));
 $table = $section->addTable(array('width' => 100*50, 'unit' => 'pct','borderSize' => 6, 'borderColor' => '006699', 'cellMargin' => 80));
