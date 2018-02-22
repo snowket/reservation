@@ -36,10 +36,10 @@
 
 
     $daily_query = "SELECT * FROM {$BOOKING_DAILY} BD
-LEFT JOIN {$BOOKING_DAILY_SERVICES} BDC on BD.id=BDC.booking_daily_id
-LEFT JOIN {$BOOKING} B on BD.booking_id=B.id
-LEFT JOIN {$BOOKING_ROOM_SERVICES} BRS on BRS.id=B.food_id
-WHERE BD.active=1 {$period_start} {$period_end} {$check_in_type} {$check_out_type} ORDER BY BD.date ASC";
+    LEFT JOIN {$BOOKING_DAILY_SERVICES} BDC on BD.id=BDC.booking_daily_id
+    LEFT JOIN {$BOOKING} B on BD.booking_id=B.id
+    LEFT JOIN {$BOOKING_ROOM_SERVICES} BRS on BRS.id=B.food_id
+    WHERE BD.active=1 {$period_start} {$period_end} {$check_in_type} {$check_out_type} ORDER BY BD.date ASC";
 
 
     $daily_query = $CONN->Execute($daily_query);
@@ -139,8 +139,9 @@ if($_POST['action'] == 'get_excel') {
 //        $sheet->setCellValueByColumnAndRow(4, $i + 2, $check_out);
         $k=0;
        foreach($items[$date[$i]]['food'] as $food){
-           $sheet->setCellValueByColumnAndRow(4+$k, $i + 9, $food['title']." (".$food['count'].")");
-           $k++;
+           $sheet->setCellValueByColumnAndRow(4+$k, $i + 9, $food['title']);
+           $sheet->setCellValueByColumnAndRow(5+$k, $i + 9, $food['count']);
+           $k+=2;
        }
         $cell_name = $columnNames[$columnNumber] . $rowNumber;
 

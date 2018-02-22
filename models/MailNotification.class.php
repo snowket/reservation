@@ -35,6 +35,13 @@ class MailNotification
         $this->mail->Host = $this->_CONF['SMTP']['Host'];
         $this->mail->Port = $this->_CONF['SMTP']['Port'];
         $this->mail->CharSet = 'utf-8';
+        $this->mail->SMTPOptions = array(
+            'ssl' => array(
+                'verify_peer' => false,
+                'verify_peer_name' => false,
+                'allow_self_signed' => false
+            )
+        );
         $this->mail->debuge = 4;
         $this->mail->Username = $this->_CONF['SMTP']['Username'];
         $this->mail->Password = $this->_CONF['SMTP']['Password'];
@@ -301,9 +308,3 @@ class MailNotification
         }
     }
 }
-
-
-
-
-
-

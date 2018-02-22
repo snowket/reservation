@@ -712,13 +712,14 @@ if ($_GET['action'] == "view") {
             $booking = $CONN->Execute($query) or $FUNC->ServerError(__FILE__, __LINE__, $CONN->ErrorMsg());
             $bookings=$booking->getRows();
             $invoice_identifier = "|";
-            foreach($bookings as $book){
+            foreach($bookings as &$book){
                 $food_obj[$book['id']]= $CONN->GetRow("select * from {$_CONF['db']['prefix']}_room_services where id={$book['food_id']}");
                 $food_obj[$book['id']]['title']=$FUNC->unpackData($food_obj[$book['id']]['title'], $lang);
-                $book['food_type']=$FUNC->unpackData($food_obj[$book['id']]['title'], $lang);
+                $book['food_type']=$food_obj[$book['id']]['title'];
                 $roomTypesByID[$book['room_id']] = getRoomTypeByID($book['room_id']);
                 $transaction[$book['id']]= getBookingTransactions($book['id']);
-
+                
+                $book['room_name']=$roomTypesByID[$book['room_id']][$book['room_id']]['title'];
                 if ($_GET['invoice_type'] == 'accommodation_dbl') {
                     $invoice_identifier .= $book['id'] . ":a|";
                 } elseif ($_GET['invoice_type'] == 'services') {
@@ -732,8 +733,14 @@ if ($_GET['action'] == "view") {
                 $fg=array_slice($fg, 1, -1);
 
                 foreach($fg as $g){
-                  $fg_guests[$book['id']][]=getGuestByID($g);
+                  $r=getGuestByID($g);
+                  $fg_guests[$book['id']][]=$r;
+                  $book['dls'].=$r['first_name']." ".$r['last_name'].' ,';
+
                 }
+
+                $book['dls']=rtrim($book['dls'],",");
+
                 $query = "SELECT * FROM {$_CONF['db']['prefix']}_booking_daily WHERE booking_id={$book['id']} ORDER BY date ASC ";
                 $booking_days[$book['id']] = $CONN->GetAll($query) or $FUNC->ServerError(__FILE__, __LINE__, $CONN->ErrorMsg());
                 foreach ($booking_days[$book['id']] AS $booking_day) {
@@ -787,6 +794,16 @@ if ($_GET['action'] == "view") {
                 $TMPL->addVar("TMPL_invoice_number", $invoice_number);
                 $html = $TMPL->ParseIntoString($template);
                 addBlobToInvoice($invoice_number, $html);
+                if ($_GET['download_word'] == 1) {
+                  require_once $ROOT . '/files/PhpWord.inc.php';
+                  require_once $ROOT . '/files/GetWorddbl.php';
+                  header_remove();
+                  header("Content-Disposition: attachment; filename=" . $invoice_number . ".docx");
+                  header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+                  readfile($ROOT . '/last_invoice/' . $invoice_number . '.docx'); // or echo file_get_contents($temp_file);
+                  unlink($ROOT . '/last_invoice/' . $invoice_number . '.docx');
+                  exit;
+                }
                 p($html);
                 $TMPL->addVar("TMPL_currency_rates", unserialize($currency_rates["currency_rates"]));
                 $TMPL->addVar("TMPL_email", $guest['email']);
@@ -867,6 +884,14 @@ function cancel_dbl_booking($id){
         archiveBooking($value['id']);
       }
 
+}
+function xmlEntities($str)
+{
+    $xml = array('&#34;','&#38;','&#38;','&#60;','&#62;','&#160;','&#161;','&#162;','&#163;','&#164;','&#165;','&#166;','&#167;','&#168;','&#169;','&#170;','&#171;','&#172;','&#173;','&#174;','&#175;','&#176;','&#177;','&#178;','&#179;','&#180;','&#181;','&#182;','&#183;','&#184;','&#185;','&#186;','&#187;','&#188;','&#189;','&#190;','&#191;','&#192;','&#193;','&#194;','&#195;','&#196;','&#197;','&#198;','&#199;','&#200;','&#201;','&#202;','&#203;','&#204;','&#205;','&#206;','&#207;','&#208;','&#209;','&#210;','&#211;','&#212;','&#213;','&#214;','&#215;','&#216;','&#217;','&#218;','&#219;','&#220;','&#221;','&#222;','&#223;','&#224;','&#225;','&#226;','&#227;','&#228;','&#229;','&#230;','&#231;','&#232;','&#233;','&#234;','&#235;','&#236;','&#237;','&#238;','&#239;','&#240;','&#241;','&#242;','&#243;','&#244;','&#245;','&#246;','&#247;','&#248;','&#249;','&#250;','&#251;','&#252;','&#253;','&#254;','&#255;');
+    $html = array('&quot;','&amp;','&amp;','&lt;','&gt;','&nbsp;','&iexcl;','&cent;','&pound;','&curren;','&yen;','&brvbar;','&sect;','&uml;','&copy;','&ordf;','&laquo;','&not;','&shy;','&reg;','&macr;','&deg;','&plusmn;','&sup2;','&sup3;','&acute;','&micro;','&para;','&middot;','&cedil;','&sup1;','&ordm;','&raquo;','&frac14;','&frac12;','&frac34;','&iquest;','&Agrave;','&Aacute;','&Acirc;','&Atilde;','&Auml;','&Aring;','&AElig;','&Ccedil;','&Egrave;','&Eacute;','&Ecirc;','&Euml;','&Igrave;','&Iacute;','&Icirc;','&Iuml;','&ETH;','&Ntilde;','&Ograve;','&Oacute;','&Ocirc;','&Otilde;','&Ouml;','&times;','&Oslash;','&Ugrave;','&Uacute;','&Ucirc;','&Uuml;','&Yacute;','&THORN;','&szlig;','&agrave;','&aacute;','&acirc;','&atilde;','&auml;','&aring;','&aelig;','&ccedil;','&egrave;','&eacute;','&ecirc;','&euml;','&igrave;','&iacute;','&icirc;','&iuml;','&eth;','&ntilde;','&ograve;','&oacute;','&ocirc;','&otilde;','&ouml;','&divide;','&oslash;','&ugrave;','&uacute;','&ucirc;','&uuml;','&yacute;','&thorn;','&yuml;');
+    $str = str_replace($html,$xml,$str);
+    $str = str_ireplace($html,$xml,$str);
+    return $str;
 }
 function delete_dbl_user_info($id){
     global $CONN, $FUNC, $_CONF, $ALOG;

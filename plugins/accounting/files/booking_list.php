@@ -535,7 +535,8 @@ if ($_GET['action'] == "view") {
     }
 
     $pageBar="";
-    $bookings = getJoinedBookings($where_clause);
+    $bookings = getJoinedBookings($where_clause,(int)$_GET['total_unpaid']);
+
     foreach ($bookings as $key => $value) {
       $date2=new DateTime($value['check_out']);
       $date1=new DateTime($value['check_in']);

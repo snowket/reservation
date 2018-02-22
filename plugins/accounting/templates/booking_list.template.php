@@ -150,6 +150,17 @@
                         <?}?>
                     </select>
                 </td>
+                <td align="right">
+                    <label for="total_unpaid"><?= $TEXT['guests_financial_state']['total_unpaid'] ?></label>
+                </td>
+                <td>
+                    <select id="total_unpaid" name="total_unpaid">
+                        <option value="0" <? if(isset($_GET['total_unpaid'])&&(int)$_GET['total_unpaid']==0){echo "selected";}?>><?= $TEXT['guests_financial_state']['all'] ?></option>
+                        <option value="1" <? if(isset($_GET['total_unpaid'])&&(int)$_GET['total_unpaid']==1){echo "selected";}?>> >0 </option>
+                        <option value="2" <? if(isset($_GET['total_unpaid'])&&(int)$_GET['total_unpaid']==2){echo "selected";}?>> =0 </option>
+                        <option value="3" <? if(isset($_GET['total_unpaid'])&&(int)$_GET['total_unpaid']==3){echo "selected";}?>> <0 </option>
+                    </select>
+                </td>
             </tr>
             <!--  -->
             <tr>

@@ -78,10 +78,10 @@ if ($POST['action'] == 'add') {
     (int)$POST['adult_num'] < 1 ? $errors[] = "adults count<1" : $adult_num = (int)$POST['adult_num'];
     $child_num = (int)$POST['child_num'];
 
-    if ($check_in < CURRENT_DATE || $check_in == '') {
+    if ($check_in < date('Y-m-d',strtotime('-1 day',strtotime(CURRENT_DATE))) || $check_in == '') {
         $errors[] = "araswori check_in";
     }
-    if ($check_out <= CURRENT_DATE || $check_out == '') {
+    if ($check_out <= date('Y-m-d',strtotime('-1 day',strtotime(CURRENT_DATE))) || $check_out == '') {
         $errors[] = "araswori check_out";
     }
     $guest_id = (int)$POST['b_guest_id'];

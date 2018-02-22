@@ -344,7 +344,6 @@ $pageBar;
 function getGuestsBookingsSummaryState($where_clause = '', $total_unpaid)
 {
     global $CONN, $FUNC, $_CONF, $pageBar, $SELF_FILTERED;
-
     if ($total_unpaid == 1) {
         $having_clause = "HAVING (credit-debit)>0";
     } elseif ($total_unpaid == 2) {
@@ -362,16 +361,18 @@ function getGuestsBookingsSummaryState($where_clause = '', $total_unpaid)
                       FROM {$_CONF['db']['prefix']}_guests AS G
                         LEFT JOIN {$_CONF['db']['prefix']}_booking AS B
                           ON G.id=B.guest_id
-                      WHERE B.active=1" . $where_clause . "
+                      WHERE 1=1" . $where_clause . "
                       UNION ALL
                       SELECT G.id, G.id_number AS guest_id_number,G.type,G.tax, G.first_name, G.last_name,G.balance, B.responsive_guest_id AS guest_id,B.services_paid_amount as debit,B.services_price as credit
                       FROM {$_CONF['db']['prefix']}_guests AS G
                         LEFT JOIN {$_CONF['db']['prefix']}_booking AS B
                           ON G.id=B.responsive_guest_id
-                      WHERE B.active=1" . $where_clause . "
+                      WHERE 1=1" . $where_clause . "
                       UNION ALL
                       SELECT G.id, G.id_number AS guest_id_number,G.type,G.tax, G.first_name, G.last_name,G.balance, G.id AS guest_id,0 as debit,0 as credit
                       FROM {$_CONF['db']['prefix']}_guests AS G
+                        LEFT JOIN {$_CONF['db']['prefix']}_booking B
+                          ON G.id=B.guest_id
                       WHERE 1=1" . $where_clause . ") AS T
         GROUP BY T.id  " . $having_clause." ORDER BY T.id DESC";
     if ($_POST['action'] == 'get_excel') {
@@ -764,7 +765,7 @@ function getAccrualBasedIncomeReport($year)
         $summary_report[$year][$m]['acc_income_tax_free'] = $r['acc_no_tax'];
         $summary_report[$year][$m]['services_income'] = $r['services'];
         $summary_report[$year][$m]['income'] = number_format($income,2,'.','');
-        $summary_report[$year][$m]['tax'] = round(($r['acc_with_tax'] / 118) * 18, 2);
+        $summary_report[$year][$m]['tax'] = round((($r['acc_with_tax']+$r['services']) / 118) * 18, 2);
         $summary_report[$year][$m]['last_12_month_income'] = number_format($last_year_total,2,'.','');
         $summary_report[($year - 1)][$m]['month'] = $report[($year - 1)][$m]['month'];
         $summary_report[($year - 1)][$m]['income'] = number_format(($report[($year - 1)][$m]['acc_with_tax'] + $report[($year - 1)][$m]['acc_with_tax'] + $report[($year - 1)][$m]['services']),2,'.','');
@@ -999,9 +1000,21 @@ function getUsageByCitizenship($start_date, $end_date)
     return $report;
 }
 
-function getJoinedBookings($where_clause = '')
+function getJoinedBookings($where_clause = '',$total_unpaid=0)
 {
      global $CONN, $FUNC, $_CONF, $pageBar, $SELF_FILTERED;
+
+     if ($total_unpaid == 1) {
+         $having_clause = "HAVING ((accommodation_price+services_price)-(paid_amount+services_paid_amount))>0";
+     } elseif ($total_unpaid == 2) {
+         $having_clause = "HAVING ((accommodation_price+services_price)-(paid_amount+services_paid_amount))=0";
+     } elseif ($total_unpaid == 3) {
+         $having_clause = "HAVING ((accommodation_price+services_price)-(paid_amount+services_paid_amount))<0";
+     } else {
+         $having_clause = "";
+     }
+
+
     $query = "SELECT B.*,R.floor,RT.title as type_title, G.id_number AS guest_id_number,G.type, G.first_name, G.last_name
               FROM {$_CONF['db']['prefix']}_booking AS B
               LEFT JOIN {$_CONF['db']['prefix']}_guests AS G
@@ -1012,7 +1025,7 @@ function getJoinedBookings($where_clause = '')
               ON RM.id=R.common_id
               LEFT JOIN {$_CONF['db']['prefix']}_room_types AS RT
               ON RM.type_id=RT.id
-              WHERE 1=1 AND dbl_res!=1 " . $where_clause." ".$order_clause;
+              WHERE 1=1 AND dbl_res!=1 " . $where_clause." ".$having_clause ." ".$order_clause;
     if ($_POST['action'] == 'get_excel') {
         $bookings = $CONN->Execute($query) or $FUNC->ServerError(__FILE__, __LINE__, $CONN->ErrorMsg());
     } else {

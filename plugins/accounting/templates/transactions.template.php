@@ -293,6 +293,9 @@ input, textarea, select {
         <td></td>
         <td></td>
         <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
         <td class="table-th">total: <?= $debit ?></td>
         <td class="table-th">total: <?= $credit ?></td>
         <td></td>

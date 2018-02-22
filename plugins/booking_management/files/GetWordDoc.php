@@ -55,6 +55,7 @@ $table->addCell(null, $styleCell)->addText(($guest['tax']==0)?"TAX FREE":"TAX IN
 
 $total_price=0;
 $breack=0;
+#dd($bookings);
 foreach($bookings AS $booking) {
     $booking['accommodation_price']=convertGelTo($booking['accommodation_price'],$rate,$count);
     $booking['paid_amount']=convertGelTo($booking['paid_amount'],$rate,$count);
@@ -162,7 +163,3 @@ $table->addCell(2300, $styleCell)->addText('', $fontStyle);
 
 
 write($phpWord, $invoice_number, $writers);
-
-
-
-

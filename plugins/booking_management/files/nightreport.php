@@ -4,9 +4,10 @@ $da=date('H:m');
 
 
 if(isset($_GET['period_start']) && $_GET['period_start']!=''){
-    $query="SELECT BD.date,BD.type,B.adult_num,B.child_num,R.name,RS.title,RS.food_count,BD.price FROM cms_booking_daily BD
+    $query="SELECT BD.date,BD.type,B.adult_num,B.child_num,R.name,RS.title,RS.food_count,BD.price,CONCAT(G.first_name,' ',G.last_name) as person_name FROM cms_booking_daily BD
     LEFT JOIN cms_booking B on B.id=BD.booking_id
     LEFT JOIN cms_rooms R on R.id=B.room_id
+    LEFT JOIN cms_guests G on B.guest_id=G.id
     LEFT JOIN cms_room_services RS on B.food_id=RS.id
     WHERE BD.date='". $_GET['period_start']."' ORDER BY R.name ASC";
 }else{

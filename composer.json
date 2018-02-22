@@ -1,0 +1,6 @@
+{
+    "require": {
+        "phpoffice/phpword": "^0.14.0",
+        "nesbot/carbon": "^1.22"
+    }
+}
