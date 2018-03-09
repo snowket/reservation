@@ -38,6 +38,7 @@ if(count($denied_ips)==0 && count($allowed_ips)>0){
 require_once("./config.php");
 require_once("./common.php");
 require 'classes/autoload.php';
+
 $FUNC      = new CommonFunc();
 require 'classes/PHPMailer/PHPMailerAutoload.php';
 

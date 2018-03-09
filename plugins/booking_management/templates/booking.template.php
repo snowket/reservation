@@ -905,7 +905,7 @@ foreach($TMPL_rooms_manager_arr AS $manager){
    echo $manager['id'].':{';
    $old_discount=0;
    for($i = ($max_adults-1); $i>0;$i--){
-        $discount=((int)$lpd[$i]==0)?$old_discount:(int)$lpd[$i];
+        $discount=((float)$lpd[$i]==0)?$old_discount:(float)$lpd[$i];
         echo $i.':'.$discount;
         $old_discount=$discount;
         if($i!=1){
@@ -1606,7 +1606,7 @@ $(document).ready(function () {
             var selected_room_id=selectedRooms[j];
             if(parseInt($("#adult_num").val())>=0){
                 //one_person_discount=parseInt($('#room_'+selected_room_id).attr('one_person_discount'));
-                one_person_discount=parseInt(managers[$('#room_'+selected_room_id).attr('common_id')][$("#adult_num").val()]);
+                one_person_discount=parseFloat(managers[$('#room_'+selected_room_id).attr('common_id')][$("#adult_num").val()]);
                 if(isNaN(one_person_discount)){
                     one_person_discount=0;
                 }
@@ -1642,7 +1642,7 @@ $(document).ready(function () {
     }
 
     function calculateNetPrice(a,food_price,c,d,f,e,g){
-        //console.log('calculateNetPrice('+a+','+food_price+','+c+','+d+','+f+','+e+','+g+');');
+        console.log('calculateNetPrice('+a+','+food_price+','+c+','+d+','+f+','+e+','+g+');');
         var daily_price=a;
         //daily_price=daily_price-daily_price/100*b;
         daily_price=daily_price-daily_price/100*c;

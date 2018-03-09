@@ -713,12 +713,15 @@ if ($_GET['action'] == "view") {
             $bookings=$booking->getRows();
             $invoice_identifier = "|";
             foreach($bookings as &$book){
+              if($book['responsive_guest_id']==0){
+            		$book['responsive_guest_id']=$book['guest_id'];
+            	}
                 $food_obj[$book['id']]= $CONN->GetRow("select * from {$_CONF['db']['prefix']}_room_services where id={$book['food_id']}");
                 $food_obj[$book['id']]['title']=$FUNC->unpackData($food_obj[$book['id']]['title'], $lang);
                 $book['food_type']=$food_obj[$book['id']]['title'];
                 $roomTypesByID[$book['room_id']] = getRoomTypeByID($book['room_id']);
                 $transaction[$book['id']]= getBookingTransactions($book['id']);
-                
+
                 $book['room_name']=$roomTypesByID[$book['room_id']][$book['room_id']]['title'];
                 if ($_GET['invoice_type'] == 'accommodation_dbl') {
                     $invoice_identifier .= $book['id'] . ":a|";
@@ -738,7 +741,6 @@ if ($_GET['action'] == "view") {
                   $book['dls'].=$r['first_name']." ".$r['last_name'].' ,';
 
                 }
-
                 $book['dls']=rtrim($book['dls'],",");
 
                 $query = "SELECT * FROM {$_CONF['db']['prefix']}_booking_daily WHERE booking_id={$book['id']} ORDER BY date ASC ";
@@ -758,9 +760,9 @@ if ($_GET['action'] == "view") {
                 foreach($booking_daily_services[$book['id']] as $key=>$BDS){
                     $booking_daily_services[$book['id']][$key]['service_title']=$FUNC->unpackData($BDS['title'],$lang);
                 }
-
             }
                 $booker=getDBLbooking_co($book['dbl_res_id']);
+
                 $TMPL->addVar("TMPL_booking_transactions", $transaction);
                 $TMPL->addVar("TMPL_room_type", $roomTypesByID);
                 $TMPL->addVar("booker", $booker);

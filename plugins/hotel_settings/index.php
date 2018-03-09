@@ -19,6 +19,7 @@ $TMPL->setRoot($ROOT);
 switch($_GET['tab']){
     case 'settings':		$tab = 'settings';		    require_once($ROOT."/files/settings.php");break;
     case 'theme':           $tab = 'theme';             require_once($ROOT."/files/theme.php");break;
+    case 'Channel':           $tab = 'Channel';             require_once($ROOT."/files/channel.php");break;
     default:			  	$tab = 'settings';		    require_once($ROOT."/files/settings.php");break;
 }
 
@@ -27,5 +28,6 @@ switch($_GET['tab']){
 if(!$LOADED_PLUGIN['restricted']){
     $tabs['settings']	= $TEXT['tab']['settings'];
     $tabs['theme']	    = $TEXT['tab']['theme'];
+    $tabs['Channel']	    = $TEXT['tab']['Channel'];
     $_CENTER = pcmsInterface::drawTabs("{$SELF_TABS}&tab=",$tabs,$tab).$_CENTER;
 }

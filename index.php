@@ -60,6 +60,19 @@ function getUserName(){
         return false;
     }
 }
+function getChanellSettings(){
+    global $CONN,$FUNC;
+    $query	= "SELECT * FROM cms_channel_settings WHERE publish='1' ORDER BY orderid,id";
+    $result	= $CONN->Execute($query)or $FUNC->ServerError(__FILE__,__LINE__,$CONN->ErrorMsg());
+    $data	= $result->GetRows();
+
+    for ($i=0;$i<count($data);$i++) {
+        $out[$data[$i]['input_name']] = $data[$i]['value'];
+    }
+
+    return $out;
+}
+
 $user=getUserName();
 $TMPL->addVar('user',$user);
 //*****************************************************//
@@ -83,7 +96,7 @@ elseif($_SESSION['pcms_user_id']==1){
 if(!isset($_GET['m']) && !isset($_GET['settings'])) {
 	require_once("index_design.php");
 }
-
+require 'classes/chennels.php';
 /*
 if($_SESSION['pcms_user_id']==1) {
 	if(!empty($LOADED_PLUGIN['settings']))
@@ -96,6 +109,7 @@ if($_SESSION['pcms_user_id']==1) {
 $query = "SELECT * FROM {$_CONF['db']['prefix']}_backups WHERE downloaded=0";
 $result = $CONN->Execute($query) or $FUNC->ServerError(__FILE__, __LINE__, mysql_error());
 $backups = $result->getRows();
+
 
 require_once("templates/index.template.php");
 $CONN->_close();

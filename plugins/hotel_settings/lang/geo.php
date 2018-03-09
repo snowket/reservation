@@ -2,13 +2,14 @@
 $TEXT['tab']= array(
     'settings'	    => 'სისტემის პარამეტრები',
     'theme'			=> 'ვიზუალიზაცია',
+    'Channel'			=> 'ჩენელ მენეჯერი',
 );
 
 $TEXT['mlisting'] = array(
   'subject'       =>    'Mail subject',
   'send'          =>    'Send',
   'newsletter'    =>    'Send newsletter',
-  'users'         =>    'View Subscribers',  
+  'users'         =>    'View Subscribers',
 );
 
 

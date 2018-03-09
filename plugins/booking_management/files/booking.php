@@ -136,7 +136,7 @@ if ($POST['action'] == 'add') {
 
         $old_discount = 0;
         for ($i = ($room_capacity_obj['capacity'] - 1); $i > 0; $i--) {
-            $lpd[$i] = ((int)$lpd[$i] == 0) ? $old_discount : (int)$lpd[$i];
+            $lpd[$i] = ((float)$lpd[$i] == 0) ? $old_discount : (float)$lpd[$i];
             $old_discount = $lpd[$i];
         }
         $less_person_discount = $lpd[$adult_num];
@@ -585,7 +585,7 @@ if ($POST['action'] == 'add') {
 
     $result = $CONN->Execute($query) or $FUNC->ServerError(__FILE__, __LINE__, $CONN->ErrorMsg());
     $data = $result->GetRows();
-       # dd($query);
+        #dd($data);
 
     if (count($data) == 0) {
         //die("No Price Plans");
