@@ -110,13 +110,14 @@ function addNewGuestDbl($corp,$tax,$idnumb,$name){
 		$sname=implode('', $pieces);
 	}
 	$query="INSERT INTO cms_guests SET type='{$corp}',publish=1,tax={$tax},id_number={$idnumb},first_name='{$sname}',last_name='{$lname}'";
-	$CONN->Execute($query) or $FUNC->ServerError(__FILE__, __LINE__, $CONN->ErrorMsg());
+	$CONN->Execute($query) or $FUNC->ServerError(__FILE__, __LINE__, $CONN->ErrorMsg(). " qr ". $query);
 	$user_id = (int)$CONN->Insert_ID();
-	return $user_id;
+	return $user_id?$user_id:false;
 }
 
 function reflectBooking($book,$vars,$i){
 			global $CONN,$_CONF,$ALOG,$FUNC;
+			$cppc=$vars['rsff'];
 			$check_in = date('Y-m-d',strtotime($vars['check_in_x'][$i]));
 			$check_out = date('Y-m-d',strtotime($vars['check_out_x'][$i]));
 			$booking_id = $book;
@@ -124,8 +125,12 @@ function reflectBooking($book,$vars,$i){
 	    $food_id = $vars['food_id'][$i];
 	    $person = $vars['person_count'][$i];
 	    $child = $vars['child_count'][$i];
+			$sum_fixed_discount = (double)$vars['all_out'];
+			$food_id = (int)$vars['food_id'][$i];
 
-	    $recalculate_price = false;
+			$one_booking_fixed_discount = round($sum_fixed_discount / count($vars['room_id']), 2);
+
+	     $recalculate_price = false;
 		   $old_booking = getBookingById($booking_id);
 			 if ($old_booking['food_id'] == $food_id) {
 						//nothing to do
@@ -151,17 +156,17 @@ function reflectBooking($book,$vars,$i){
 						 $recalculate_price = true;
 						 $msg['success'][] = "booking room changed successfully!";
 				 }
-				 if ($old_booking['adult_num'] == $person) {
+				 if ($one_booking_fixed_discount==$old_booking['fixed_discount']) {
 							//nothing to do
 					} else {
 							//fasis sheucvlelad gadayavs sxva otaxshi
 							$query = "UPDATE {$_CONF['db']['prefix']}_booking SET
-														adult_num = {$person},
+														fixed_discount = {$one_booking_fixed_discount},
 									updated_at=NOW()
 									WHERE id={$booking_id}";
 							$result = $CONN->_query($query) or $FUNC->ServerError(__FILE__, __LINE__, $CONN->ErrorMsg());
 							$recalculate_price = true;
-							$msg['success'][] = "booking room changed successfully!";
+							$msg['success'][] = "booking fixed discount changed successfully!";
 					}
 	    if ($old_booking['room_id'] == $room_id) {
 	        //nothing to do
@@ -198,7 +203,7 @@ function reflectBooking($book,$vars,$i){
 	        $new_check_in_mk = mktime(1, 0, 0, substr($check_in, 5, 2), substr($check_in, 8, 2), substr($check_in, 0, 4));
 
 	        $diff = $new_check_in_mk - $old_check_in_mk;
-	        foreach ($old_booking_days as $old_booking_day) {
+	   		foreach ($old_booking_days as $old_booking_day) {
 	            $old_booking_day_check_in_mk = mktime(1, 0, 0, substr($old_booking_day['date'], 5, 2), substr($old_booking_day['date'], 8, 2), substr($old_booking_day['date'], 0, 4));
 	            //$old_booking_day_check_in_mk =$old_booking_day['mk_time'];
 	            $query = "UPDATE {$_CONF['db']['prefix']}_booking_daily SET
@@ -240,7 +245,7 @@ function reflectBooking($book,$vars,$i){
 	        $food_obj = $CONN->GetRow("select * from {$_CONF['db']['prefix']}_room_services where id={$food_id}");
 
 
-	        $daily_discount = $old_booking['daily_ind_discount'];
+	        $daily_discount =(float) $old_booking['daily_ind_discount'];
 	        $adult_num = (int)$old_booking['adult_num'];
 	        $child_num = (int)$old_booking['child_num'];
 	        $food_price = (double)$food_obj['price'] * ($adult_num + $child_num);
@@ -251,16 +256,26 @@ function reflectBooking($book,$vars,$i){
 	        $guest_ind_discount = $guest_obj['ind_discount'];
 	        if ($guest_obj['tax'] == 0) {
 	            $guest_tax_discount = 18;
-	        }
+	        } else{
+						$guest_tax_discount=0;
+					}
+
+					if ($one_booking_fixed_discount != 0) {
+							$daily_discount += round($one_booking_fixed_discount / (count($booking_days)-1), 2);
+					}
+					$cppc = round($cppc /  (count($booking_days)-1), 2);
 
 	        foreach ($booking_days as $booking_day) {
-
 	            $a = $room_prices[$booking_day['date']]['price'];
 	            $b = $room_prices[$booking_day['date']]['discount'];
 	            $pay_now_discount = 0;
 	            if ($booking_day['type'] != 'check_out') {
-	                $new_price = calculateNetPrice($a, $food_price, $b, $one_person_discount, $pay_now_discount, $guest_ind_discount, $daily_discount, $guest_tax_discount);
-	                $msg['progress'][] = $booking_day['date'] . "->" . $a;
+	                if($cppc > 0 ){
+											$new_price =$cppc;
+									}else{
+										$new_price = calculateNetPrice($a, $food_price, $b, $one_person_discount, $pay_now_discount, $guest_ind_discount, $daily_discount, $guest_tax_discount);
+									}
+									$msg['progress'][] = $booking_day['date'] . "->" . $a;
 	                $query = "UPDATE {$_CONF['db']['prefix']}_booking_daily SET
 	                                 price=" . $new_price . "
 	                                 WHERE id=" . $booking_day['id'];
@@ -277,12 +292,15 @@ function editBooking_double($vars){
 	$errors=array();
 
 	$booking_array=explode(',', $vars['booked_array']);
+	$sum_fixed_discount = (double)$vars['all_out'];
+	$food_id = (int)$vars['food_id'][$i];
+
+	$one_booking_fixed_discount = round($sum_fixed_discount / count($vars['room_id']), 2);
 	foreach($vars['room_id'] as $i=>$value){
 		if(isset($vars['booking_ids'][$i])){
 				reflectBooking($vars['booking_ids'][$i],$vars,$i);
 				continue;
 		}
-
 		$conflict_bookings=array();
 		$check_in = date('Y-m-d',strtotime($vars['check_in_x'][$i]));
 		$check_out = date('Y-m-d',strtotime($vars['check_out_x'][$i]));
@@ -291,10 +309,7 @@ function editBooking_double($vars){
 
 		$daily_ind_discount = (double)$vars['day_out'];
 		$booking_comment = $vars[$i]['booking_comment'];
-		$sum_fixed_discount = (double)$vars['all_out'];
-		$food_id = (int)$vars['food_id'][$i];
 
-		$one_booking_fixed_discount = round($sum_fixed_discount / count($vars['room_id']), 2);
 		//p($one_booking_fixed_discount); exit;
 		(int)$vars['person_count'][$i] < 1 ? $errors[] = "adults count<1" : $adult_num = (int)$vars['person_count'][$i];
 		$child_num = (int)$vars['child_num'][$i];
@@ -521,9 +536,8 @@ function saveBooking_double($vars){
 		if($guest_id==0){
 			$guest_id=addNewGuestDbl($vars['group1'],$vars['group2'],$vars['co_number'],$vars['co_name']);
 		}
-		#dd($errors);
 		$responsive_guest_id = $guest_id;
-		$affiliate_id = (int)$vars[$i]['b_affiliate_id'];
+		$affiliate_id = 0;
 		$status_id = 1;
 
 		$guest_obj = $CONN->GetRow("select * from {$_CONF['db']['prefix']}_guests where id={$guest_id}");
@@ -659,6 +673,7 @@ function saveBooking_double($vars){
 												$guest_daily_net_price = calculateNetPrice($a, $food_price, $b, $c, $d, $f, $e, $g);
 												$affiliate_daily_net_price = calculateNetPrice($a, $food_price, $b, $c, $d, $f2, $e2, $g2);
 										}
+
 										$guest_net_price += $guest_daily_net_price;
 										$affiliate_net_price += $affiliate_daily_net_price;
 
@@ -677,6 +692,7 @@ function saveBooking_double($vars){
 								$startDate = strtotime('+1 day', $startDate);
 						}
 						$guest_total_price = $guest_net_price + $services_total_price;
+
 						if ($affiliate_id != 0) {
 								$cashBack = $guest_net_price - $affiliate_net_price;
 								if ($cashBack > 0) {
@@ -690,6 +706,12 @@ function saveBooking_double($vars){
 						$ALOG->addActivityLog(
 								"ჯგუფური ჯავშანი",
 								"Administrator Added New Booking[{$booking_id}] Guest[{$guest_id}] room[{$room_id}] check_in[{$check_in}] check_out[{$check_out}]",
+								$_SESSION['pcms_user_id'],
+								serialize($vars)
+						);
+						$ALOG->addActivityLog(
+								"ჯგუფური ჯავშანი",
+								"Administrator Added Booking[{$booking_id}] Cashback {$cashBack}",
 								$_SESSION['pcms_user_id'],
 								serialize($vars)
 						);

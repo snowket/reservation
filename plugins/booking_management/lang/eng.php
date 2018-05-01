@@ -95,7 +95,7 @@ $TEXT['tab']['booking_list']['title']='Booking List';
 $TEXT['tab']['feeding']['title']='Feeding';
 $TEXT['tab']['nightreport']['title']='One night Report';
 /*
-$TEXT['tab']['room_types']='Room Tipe'; 
+$TEXT['tab']['room_types']='Room Tipe';
 $TEXT['tab']['room_cap']='Capacity';
 $TEXT['tab']['price']='Prices';
 $TEXT['tab']['discounts']='Discounts';
@@ -175,6 +175,8 @@ $TEXT['invoice']= array(
 	'transfer'=>'Transfer',
 	'cr_card'=>'Credit Card',
 	'exchange'=>'Barter',
+	'balance'=>'Balance',
+	'pos'=>'POS Terminal',
 	'note'=>'Note',
 	'handed'=>'Hendeh',
 	'st'=>'Stamp.',

@@ -13,6 +13,11 @@
 <script src="./js/new_datepicker.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
 <style>
+.ccls_class{
+  background: #919191;
+  color:white;
+  border:none;
+}
 input[type='radio']:after {
         width: 10px;
         height: 10px;
@@ -158,6 +163,7 @@ input[type='radio']:after {
 		width:172px;
 	}
 </style>
+
 <form method="post" id="update_booking" action="index.php?m=booking_management&amp;tab=booking_dbl">
 <input type="hidden" name="action" value="edit_booking">
 <input type="hidden" name="master_id" value="<?=$_GET['booking_id']?>">
@@ -213,7 +219,7 @@ input[type='radio']:after {
 									<span class="text">კომპანიის ID </span>
 								</td>
 								<td>
-									<input type="number" name="co_number" class="" required="" value="<?=$guest['id_number']?>">
+									<input type="number" name="co_number" class=""  value="<?=$guest['id_number']?>">
 								</td>
 							</tr>
 						</table>
@@ -566,19 +572,91 @@ input[type='radio']:after {
 				</table>
 			</td>
 		</tr>
+    <tr>
+      <td colspan="2">
+        <table class="informer">
+          <tr>
+            <td>
+              <span class="text">საერთო ღირებულება</span>
+            </td>
+            <td>
+              <input type="number" disabled name='sum_price' class="sum_price" value="0">
+              <input type="hidden" disabled name='tsum_price' class="tsum_price" value="">
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
 		<tr>
 			<td colspan="2">
 				<table class="informer">
 					<tr>
 						<td>
-							<span class="text">საერთო ღირებულება</span>
+							<span class="text">ფასის რედაქტირება</span>
 						</td>
 						<td>
-							<input type="number" disabled name='sum_price' class="sum_price" value="0">
+							<input type="number"  name='rsff' class="rsff" value="0">
 						</td>
 					</tr>
 				</table>
 			</td>
+
+      <tr>
+        <td colspan="2">
+  				<table class="informer">
+  					<tr>
+  						<td>
+  							<span class="text">გადახდილი : </span>
+  						</td>
+  						<td>
+  							<input type="number" disabled  class="ssls" value="<?=$alloutTrans?>">
+  						</td>
+  					</tr>
+  				</table>
+  			</td>
+      </tr>
+      <td colspan="2">
+        <table class="informer">
+          <tr>
+            <td>
+              <span class="text">დარჩენილი გადასახდელი : </span>
+            </td>
+            <td>
+              <input type="number" disabled  class="swift_out" value="">
+            </td>
+          </tr>
+        </table>
+      </td>
+      <tr>
+        <td colspan="2">
+          <table class="informer">
+            <tr>
+              <td>
+                <span class="text">გადახდა  </span>
+              </td>
+              <td>
+                  <input type="number" min="0" step="0.01"  id="ssls" class="ssls" >
+                  <select name="payment_method_id" id="payment_method_id" class="formField1" style="">
+                      <? foreach($TMPL_payment_methods as $payment_method){
+                          if($payment_method['id']==5){
+                              if($TMPL_guest['balance']!=0){
+                                  echo '<option value="' . $payment_method['id'] . '" >' . $payment_method['title'] . '(' . $TMPL_guest['balance'] . ')</option>';
+                              }
+                          }elseif($payment_method['id']==3){
+                              if(!empty($TMPL_guestRegularPayments)){
+                                  echo '<option value="'.$payment_method['id'].'" >'.$payment_method['title'].'</option>';
+                              }
+                          }else{
+                              echo '<option value="'.$payment_method['id'].'" >'.$payment_method['title'].'</option>';
+                          }
+                      }?>
+                  </select>
+                <button type="button" class="ccls_class"  name="button">pay</button>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
 		</tr>
 		<tr>
 
@@ -738,7 +816,39 @@ input[type='radio']:after {
 	$('.day_out').change(function(){
 		regenPrice();
 	});
-  var dateOptions={
+  $('.rsff').change(function(){
+    var $sum_price=0;
+    var x=$('.room_price').toArray();
+      $.each(x,function(e,b){
+        $sum_price=parseFloat($sum_price)+parseFloat($(b).val());
+      })
+    var $all_out=$('.all_out').val();
+    // $sum_price=parseFloat($sum_price)+parseFloat($all_out);
+    var $ev=$(this).val();
+    var  $all_ex=$sum_price-$ev;
+    $('.all_out').val($all_ex);
+    $('.sum_price').val($ev);
+  });
+  $('.ccls_class').click(function(e){
+    e.preventDefault();
+    var pr=$('#ssls').val();
+    var pay=$('#payment_method_id').val();
+    var master=<?=$_GET['booking_id']?>;
+    $.get('index.php?m=booking_management&tab=booking_dbl_list&action=set_pay&booking_id=' + master + '&price=' + pr + '&meth=' + pay,function(data){
+      if(data=='OK'){
+        swal({
+          text:  "თანხის შეტანა წარმატებით დასრულდა",
+          type: "success",
+          timer: 3000,
+          showConfirmButton: false
+      });
+      window.setTimeout(function(){
+          location.reload();
+      } ,3000);
+      }
+    })
+  })
+   var dateOptions={
   format:'dd-mm-yyyy',
   changeMonth: true,
   numberOfMonths: 2,
@@ -927,19 +1037,7 @@ input[type='radio']:after {
         $target.css('position','fixed');
 
     });
-	$(function() {
-		var price=0;
-		$('.levok').live('change',function(){
-		var classList = $(this).attr('class').split(/\s+/);
-		var id=classList[0].split('_id_');
-		id=id.pop();
-			var priceR=updatePrice(this);
-			$(this).find('.room_price').val(priceR);
-	   	sumPrices();
-  		updateFoodPrice();
-  		updateAccprice();
-		});
-	});
+
 	function regenPrice(){
 		var levok=$('.levok');
 		$.each(levok,function(key,item){
@@ -1328,7 +1426,10 @@ input[type='radio']:after {
 	    $.each(prices,function(index,value){
 	      master_price=master_price+parseFloat($(value).val());
 	    });
+      master_price=master_price.toFixed(2);
 	    $('.sum_price').val(master_price);
+      var trans=$('.ssls').val();
+      $('.swift_out').val(parseFloat(master_price)-parseFloat(trans));
 	  }
 	function AddRowRoomTmp(element){
 		//window.event.preventDefault();
@@ -1410,18 +1511,27 @@ input[type='radio']:after {
 	    return between;
 	}
 
-	    function getRoomPrice(room_id,day,callback){
-	      $.ajax({
-	         type: "GET",
-	         url:"index_ajax.php",
-	         data: {'cmd':'get_room_price','day':day,'room_id':room_id},
-	         dataType: 'json',
-	         async: false,
-	         success: function(message){
-	            callback(message);
-	        }
-	       });
-	    }
+localStorage.clear();
+
+  function getRoomPrice(room_id,day,callback){
+  if(localStorage.getItem(room_id + '_' + day)){
+      var retrievedObject = localStorage.getItem(room_id + '_' + day);
+    callback( JSON.parse(retrievedObject));
+  }else{
+    $.ajax({
+       type: "GET",
+       url:"index_ajax.php",
+       data: {'cmd':'get_room_price','day':day,'room_id':room_id},
+       dataType: 'json',
+       async: false,
+       success: function(message){
+         localStorage.setItem(room_id + '_' + day, JSON.stringify(message));
+          callback(message);
+      }
+     });
+  }
+
+  }
 
 	    var guest_net_price = 0;
 	    var guest_total_price=0;
@@ -1451,6 +1561,7 @@ input[type='radio']:after {
 	    	var acc=sum-food;
 	    	if(acc>0){
 	    		$('.acc_price').val(acc);
+
 	    	}
 
 	    }
@@ -1500,7 +1611,7 @@ input[type='radio']:after {
          var daily_discount=0;
          var fixed_discount_tmp=parseFloat($('.all_out').val());
           var levok_count=$('.levok').length;
-          var fixed_discount=parseFloat(fixed_discount_tmp/levok_count);
+          var fixed_discount=parseFloat((fixed_discount_tmp/levok_count).toFixed(2));
 
              var selected_room_id=$option_room.val();
              if(parseInt($option_adult.val())>=0){
@@ -1518,7 +1629,7 @@ input[type='radio']:after {
                  });
                 }
 
-           if(acc=='0'){
+                if(acc=='0'){
                    console.log('price acc = 0');
                    return false;
                  }
@@ -1534,7 +1645,9 @@ input[type='radio']:after {
 
              }
               guest_total_price=parseFloat(guest_total_price)-parseFloat(fixed_discount);
+
               CalcPersons();
+
          return guest_total_price;
      }
 
@@ -1552,6 +1665,7 @@ input[type='radio']:after {
 	    }
       $('.book_it').click(function(e){
         if(!$('#update_booking')[0].checkValidity()){
+          console.log($('#update_booking').serializeArray());
           e.preventDefault();
         }
         var levok=$('.levok');

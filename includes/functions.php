@@ -20,7 +20,18 @@ function BuildBlock($block_id,$moduls=array(),$folder="moduls"){
 		}
 	}
 }
+function getChanellSettings(){
+    global $CONN,$FUNC;
+    $query	= "SELECT * FROM cms_channel_settings WHERE publish='1' ORDER BY orderid,id";
+    $result	= $CONN->Execute($query)or $FUNC->ServerError(__FILE__,__LINE__,$CONN->ErrorMsg());
+    $data	= $result->GetRows();
 
+    for ($i=0;$i<count($data);$i++) {
+        $out[$data[$i]['input_name']] = $data[$i]['value'];
+    }
+
+    return $out;
+}
 
 
 function makeUri($node){

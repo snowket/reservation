@@ -36,9 +36,11 @@
       $start_date++;
     }
     foreach ($ref_year_array as $value) {
-      $tmp=getAnnualIncomeReport($value);
+      $tmp=getAccrualBasedIncomeReport($value);
       $report[$value]=$tmp[$value];
     }
+    #dd($report);
+
     $budgets=getBudgets($ref_year_array);
     #dd($budgets);
 

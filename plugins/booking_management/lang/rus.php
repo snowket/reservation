@@ -87,7 +87,7 @@ $TEXT['setts'] = array(
 $TEXT['tab']['booking']='დაჯავშნა';
 $TEXT['tab']['booking_list']='ჯავშნების სია';
 /*
-$TEXT['tab']['room_types']='ოთახის ტიპები'; 
+$TEXT['tab']['room_types']='ოთახის ტიპები';
 $TEXT['tab']['room_cap']='ტევადობა';
 $TEXT['tab']['price']='ფასები';
 $TEXT['tab']['discounts']='ფასდაკლებები';
@@ -166,6 +166,8 @@ $TEXT['invoice']= array(
     'transfer'=>'Transfer',
     'cr_card'=>'Credit Card',
     'exchange'=>'Exchange',
+    'balance'=>'Balance',
+    'pos'=>'POS Terminal',
     'handed'=>'Handed',
     'st'=>'s.t',
     'received'=>'Received',

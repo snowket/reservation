@@ -40,7 +40,7 @@ $where_clause = "";
 
 (isset($_GET['booking_id']) && !empty($_GET['booking_id'])) ? $where_clause = " AND B.id='" . $_GET['booking_id'] . "'" : $where_clause .= "";
 if (isset($_GET['invoice_id']) && !empty($_GET['invoice_id'])) {
-    $where_clause = " AND B.id IN(0";
+    $where_clause = " AND B.id IN(0)";
     $invoice = getInvoiceByID((int)$_GET['invoice_id']);
     if ($invoice) {
         $parts = explode('|', $invoice['uniq_identifier']);
@@ -101,8 +101,8 @@ if ($_POST['action'] == 'add_foreign_guest') {
     }
 
     $pageBar = "";
-
-    $bookings = getJoinedBookings($where_clause);
+    $relx=isset($_GET['appro'])?1:0;
+    $bookings = getJoinedBookings($where_clause,$order_clause,$relx);
     $food = getAllServices(6);
     $statuses = getAllStatuses();
     $guests = getAllGuest();
@@ -429,11 +429,12 @@ if ($_GET['action'] == "view") {
                     $guestRegularPayments[$guestTransaction['transaction_id']] = $guestTransaction;
                 }
             }
+            $TMPL->addVar("TMPL_guestRegularPayments", $guestRegularPayments);
             $TMPL->addVar('TMPL_all_food', GetServices(6));
             $TMPL->addVar("TMPL_errors", $errors);
             $TMPL->addVar('TMPL_countries', getAllCountries());
             $TMPL->addVar('TMPL_food', $FUNC->unpackData($food_obj['title'], LANG));
-            $TMPL->addVar("TMPL_guestRegularPayments", $guestRegularPayments);
+
             $TMPL->addVar("TMPL_booking_transactions", getBookingTransactions($booking_id));
             $TMPL->addVar("TMPL_payment_methods", getAllPaymentMethods());
             $TMPL->addVar("TMPL_booking_days", $booking_days);
@@ -618,8 +619,18 @@ if ($_GET['action'] == "view") {
                 $invoice_number = addInvoice($invoice_identifier);
                 $invoice = getInvoiceByID($invoice_number);
 
+
+                $tans="SELECT bt.*,bpm.title as payment_title FROM cms_booking_transactions bt
+                       LEFT JOIN cms_booking_payment_methods bpm ON bt.payment_method_id=bpm.id WHERE bt.booking_id=".$_GET['booking_id'];
+                $tans = $CONN->Execute($tans) or $FUNC->ServerError(__FILE__, __LINE__, $CONN->ErrorMsg());
+                $tans = $tans->GetRows();
+                $tr=array();
+                foreach ($tans as $key => $value) {
+                  $tr[$value['payment_method_id']]+=$value['amount'];
+                }
                 $TMPL->addVar("TMPL_invoice_number", $invoice_number);
                 $TMPL->addVar("TMPL_invoice", $invoice);
+                $TMPL->addVar("tr", $tr);
                 $TMPL->addVar("TMPL_guest", $guest);
                 $TMPL->addVar("TMPL_Rguest", $res_guest);
                 $TMPL->addVar("TMPL_Fguest", $fg_guests);
@@ -738,9 +749,9 @@ if ($_GET['action'] == "view") {
         $guests[$guest['id']] = $guest;
     }
     $pageBar = "";
-    $bookings = getJoinedBookings($where_clause,$order_clause);
+    $relx=isset($_GET['appro'])?1:0;
+    $bookings = getJoinedBookings($where_clause,$order_clause,$relx);
     $lastid=0;
-
 
     $food = getAllServices(6);
     $statuses = getAllStatuses();

@@ -707,7 +707,7 @@ elseif ($_GET['cmd'] == "get_free_rooms_dbl") {
             }
             $old_price = $booking_day['price'];
 
-            
+
             $new_price = $new_total_acc_price / (count($booking_days) - 1);
             // if ($old_total_acc_price == 0) {
             //     $new_price = $new_total_acc_price / (count($booking_days) - 1);
@@ -1125,6 +1125,14 @@ else if ($_GET['cmd'] == "del_sp") {
         $query = "SELECT * FROM {$_CONF['db']['prefix']}_booking
 			  WHERE active=1 AND id=" . $booking_id;
         $booking = $CONN->GetRow($query) or $FUNC->ServerError(__FILE__, __LINE__, $CONN->ErrorMsg());
+        $fg=$booking['foreign_guest_ids'];
+        $fg=explode('|',$fg);
+        $fg=array_slice($fg, 1, -1);
+        $fg_guests="";
+        foreach($fg as $g){
+          $tmp=getGuestByID($g);
+          $fg_guests.=$tmp['first_name']." ".$tmp['last_name']. "<br>";
+        }
 
         $food_obj = $CONN->GetRow("select * from {$_CONF['db']['prefix']}_room_services where id={$booking['food_id']}");
 
@@ -1164,6 +1172,7 @@ else if ($_GET['cmd'] == "del_sp") {
         $return['guest']['name'] = $guests[$booking['guest_id']]['first_name'] . ' ' . $guests[$booking['guest_id']]['last_name'];
         $return['guest']['id_number'] = $guests[$booking['guest_id']]['id_number'];
         $return['guest']['email'] = $guests[$booking['guest_id']]['email'];
+        $return['guests']['text'] = $fg_guests;
         $return['affiliate']['id']=$booking['affiliate_id'];
         $return['affiliate']['name']= $guests[$booking['affiliate_id']]['first_name'] . ' ' . $guests[$booking['affiliate_id']]['last_name'];
 
@@ -2016,4 +2025,13 @@ LEFT JOIN cms_ch_rooms CR on CBI.room_id=CR.id
         $res['room_name']=$FUNC->unpackData($res['room_name'],'geo');
     }
     return $result;
+}
+function getGuestByID($guest_id)
+{
+    global $CONN, $FUNC, $_CONF;
+    $query = "SELECT *
+				FROM {$_CONF['db']['prefix']}_guests
+			  	WHERE id={$guest_id}";
+    $guest = $CONN->GetRow($query) or $FUNC->ServerError(__FILE__, __LINE__, $CONN->ErrorMsg());
+    return $guest;
 }

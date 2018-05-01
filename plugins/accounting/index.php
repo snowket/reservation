@@ -361,19 +361,19 @@ function getGuestsBookingsSummaryState($where_clause = '', $total_unpaid)
                       FROM {$_CONF['db']['prefix']}_guests AS G
                         LEFT JOIN {$_CONF['db']['prefix']}_booking AS B
                           ON G.id=B.guest_id
-                      WHERE 1=1" . $where_clause . "
+                      WHERE B.active=1 " . $where_clause . "
                       UNION ALL
                       SELECT G.id, G.id_number AS guest_id_number,G.type,G.tax, G.first_name, G.last_name,G.balance, B.responsive_guest_id AS guest_id,B.services_paid_amount as debit,B.services_price as credit
                       FROM {$_CONF['db']['prefix']}_guests AS G
                         LEFT JOIN {$_CONF['db']['prefix']}_booking AS B
                           ON G.id=B.responsive_guest_id
-                      WHERE 1=1" . $where_clause . "
+                      WHERE B.active=1" . $where_clause . "
                       UNION ALL
                       SELECT G.id, G.id_number AS guest_id_number,G.type,G.tax, G.first_name, G.last_name,G.balance, G.id AS guest_id,0 as debit,0 as credit
                       FROM {$_CONF['db']['prefix']}_guests AS G
                         LEFT JOIN {$_CONF['db']['prefix']}_booking B
                           ON G.id=B.guest_id
-                      WHERE 1=1" . $where_clause . ") AS T
+                      WHERE B.active=1" . $where_clause . ") AS T
         GROUP BY T.id  " . $having_clause." ORDER BY T.id DESC";
     if ($_POST['action'] == 'get_excel') {
         $result = $CONN->Execute($query) or $FUNC->ServerError(__FILE__, __LINE__, $CONN->ErrorMsg());

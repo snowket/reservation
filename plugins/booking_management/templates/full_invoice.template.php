@@ -273,19 +273,23 @@ for($i=0; $i<count($TMPL_booking_days); $i++){ unset($tj);?>
 <br note-->
 <table width="100%" border="1" style="width:100%; border-collapse: collapse;" cellpadding="2" cellspacing="0">
     <tr>
-        <td bgcolor="#ccc" style="color:#000;" colspan="4"><?= $TEXT['invoice']['payment_method']?></td>
+        <td bgcolor="#ccc" style="color:#000;" colspan="6"><?= $TEXT['invoice']['payment_method']?></td>
     </tr>
     <tr>
         <td align="center"><?= $TEXT['invoice']['by_cash']?></td>
         <td align="center"><?= $TEXT['invoice']['transfer']?></td>
         <td align="center"><?= $TEXT['invoice']['cr_card']?></td>
         <td align="center"><?= $TEXT['invoice']['exchange']?></td>
+        <td align="center"><?= $TEXT['invoice']['balance']?></td>
+        <td align="center"><?= $TEXT['invoice']['pos']?></td>
     </tr>
     <tr>
-        <td align="center">-</td>
-        <td align="center">-</td>
-        <td align="center">-</td>
-        <td align="center">-</td>
+        <td align="center"><?=($tr[1])?$tr[1]:'-'?></td>
+        <td align="center"><?=($tr[2])?$tr[2]:'-'?></td>
+        <td align="center"><?=($tr[3])?$tr[3]:'-'?></td>
+        <td align="center"><?=($tr[4])?$tr[4]:'-'?></td>
+        <td align="center"><?=($tr[5])?$tr[5]:'-'?></td>
+        <td align="center"><?=($tr[6])?$tr[6]:'-'?></td>
     </tr>
 </table>
 <br>

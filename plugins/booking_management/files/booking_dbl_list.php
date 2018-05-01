@@ -40,7 +40,7 @@ $where_clause = "";
 
 (isset($_GET['booking_id']) && !empty($_GET['booking_id'])) ? $where_clause = " AND B.id='" . $_GET['booking_id'] . "'" : $where_clause .= "";
 if (isset($_GET['invoice_id']) && !empty($_GET['invoice_id'])) {
-    $where_clause = " AND B.id IN(0";
+    $where_clause = " AND B.id IN(0)";
     $invoice = getInvoiceByID((int)$_GET['invoice_id']);
     if ($invoice) {
         $parts = explode('|', $invoice['uniq_identifier']);
@@ -112,7 +112,7 @@ elseif ($_POST['action_dbl'] == 'cancel_dbl_booking') {
 
     $pageBar = "";
 
-    $bookings = getJoinedBookings($where_clause);
+    $bookings = getDblJoinedBookings($where_clause);
     $food = getAllServices(6);
     $statuses = getAllStatuses();
     $guests = getAllGuest();
@@ -430,14 +430,40 @@ if ($_GET['action'] == "view") {
                 }
             }
             $booking_array=array();
+            $pr_bookings=0;
+            $alloutTrans=0;
             foreach ($bookings as $key => $value) {
+              $pr_bookings+=$value['accommodation_price'];
+              $query = "SELECT SUM(amount) as amount
+                        FROM {$_CONF['db']['prefix']}_booking_transactions
+                        WHERE booking_id =" . $value['id'] . " AND result='OK'";
+              $result = $CONN->Execute($query) or $FUNC->ServerError(__FILE__, __LINE__, $CONN->ErrorMsg());
+              $transactions = $result->GetRows();
+              $alloutTrans+=$transactions['0']['amount'];
                 $booking_array[$key]=$value['id'];
             }
+            $roomCapacity = GetRoomCapacity();
+          foreach ($roomCapacity as $key => $value) {
+              $rcArr[$value['id']] = $value;
+          }
+          // $guestTransactions = getBookingTransactionsD($bookings[0]['id']);
+          // $alloutTrans=0;
+          // foreach ($guestTransactions AS $guestTransaction) {
+          //     if ($guestTransaction['destination'] == 'rp_registration' && $guestTransaction['result'] == 'OK') {
+          //         $guestRegularPayments[$guestTransaction['transaction_id']] = $guestTransaction;
+          //     }
+          //     $alloutTrans+=$guestTransaction['amount'];
+          // }
+          $TMPL->addVar("TMPL_guest", $guest);
+          $TMPL->addVar("alloutTrans", $alloutTrans);
+          $TMPL->addVar("pr_bookings", $pr_bookings);
+          $TMPL->addVar("TMPL_guestRegularPayments", $guestRegularPayments);
+          $TMPL->addVar('TMPL_capacity', $rcArr);
+            $TMPL->addVar("TMPL_payment_methods", getAllPaymentMethods());
             $TMPL->addVar("bookings_array", $booking_array);
             $TMPL->addVar('TMPL_all_food', GetServices(6));
             $TMPL->addVar('TMPL_rooms_manager_arr', $rooms_manager_arr);
             $TMPL->addVar("TMPL_bookings", $bookings);
-            $TMPL->addVar("bookings_array", $booking_array);
             $TMPL->addVar("guest", $guest);
             $TMPL->addVar("booking_master", $booking_master);
             $TMPL->ParseIntoVar($_CENTER, "booking_view_dbl");
@@ -446,7 +472,43 @@ if ($_GET['action'] == "view") {
         }
 
 
-} elseif ($_GET['action'] == "send_invoice") {
+} elseif ($_GET['action'] == "set_pay") {
+  $paied=(double)$_GET['price'];
+  $payment_method_id=$_GET['meth'];
+  $booking_id = (int)$_GET['booking_id'];
+
+  $bookings = getAlldblBookings($booking_id);
+  foreach ($bookings as $key => $value) {
+    $query = "SELECT SUM(amount) as amo
+              FROM {$_CONF['db']['prefix']}_booking_transactions
+              WHERE booking_id =" . $value['id'] . " AND result='OK' AND destination='accommodation'";
+    $result = $CONN->Execute($query) or $FUNC->ServerError(__FILE__, __LINE__, $CONN->ErrorMsg());
+    $transactions = $result->fields;
+    if($paied <= 0 || ($transactions['amo'] == (double)$value['accommodation_price'])){
+      continue;
+    }elseif($transactions['amo'] > 0 && ($transactions['amo'] < (double)$value['accommodation_price'])) {
+      $tempValue=(double)$value['accommodation_price']-$transactions['amo'];
+      $tempValue=$tempValue > $paied ? $paied:$tempValue;
+      updatedbBookingAccPrice($value['id'],(double)$tempValue,$payment_method_id);
+      $paied=$paied-$tempValue;
+    }else{
+      if ($paied >= (double)$value['accommodation_price']) {
+        $tempValue=(double)$value['accommodation_price'];
+        updatedbBookingAccPrice($value['id'],(double)$tempValue,$payment_method_id);
+        $paied=$paied-$tempValue;
+      }else{
+        updatedbBookingAccPrice($value['id'],(double)$paied,$payment_method_id);
+        $paied=0;
+      }
+    }
+  }
+
+  if($paied>0){
+    updateGuestBalanceD($value['guest_id'],$paied);
+  }
+  echo 'OK';
+  exit;
+}elseif ($_GET['action'] == "send_invoice") {
 
     $invoice_id = (int)$_POST['invoice_id'];
     $note = $_POST['note'];
@@ -839,18 +901,23 @@ if ($_GET['action'] == "view") {
     $lastid=0;
     $master=array();
     foreach ($bookings as $key => $value) {
+      $tmp=$master[$value['dbl_res_id']]['info']['left_amo'];
       $master[$value['dbl_res_id']]['info']=getDBLbooking_co($value['dbl_res_id']);
+      $query = "SELECT SUM(amount) as amo
+                FROM {$_CONF['db']['prefix']}_booking_transactions
+                WHERE booking_id =" . $value['id'] . " AND result='OK' AND destination='accommodation'";
+      $result = $CONN->Execute($query) or $FUNC->ServerError(__FILE__, __LINE__, $CONN->ErrorMsg());
+      $transactions = $result->fields;
 
+      $master[$value['dbl_res_id']]['info']['left_amo']=$tmp+$transactions['amo'];
       $master[$value['dbl_res_id']]['array'][]=$value;
     }
-
     foreach ($master as $key => $value) {
         foreach ($value['array'] as $y => $x) {
+      
            $master[$key]['info']['price']+=$x['accommodation_price'];
         }
     }
-    #dd($master);
-
     $food = getAllServices(6);
     $statuses = getAllStatuses();
     $rooms = GetAllRooms();
@@ -895,6 +962,16 @@ function xmlEntities($str)
     $str = str_ireplace($html,$xml,$str);
     return $str;
 }
+function updatedbBookingAccPrice($id,$value,$meth)
+{
+  global $CONN, $FUNC, $_CONF, $ALOG;
+  $booking_id = $id;
+  $booking = getBookingById($booking_id);
+  $guest = getGuestByID($booking['guest_id']);
+  $current_balance = (float)$guest['balance'];
+  $amount =$value;
+  addBookingTransaction('global', $booking['guest_id'], $booking_id, $_SESSION['pcms_user_id'], $amount, $meth, 'accommodation');
+}
 function delete_dbl_user_info($id){
     global $CONN, $FUNC, $_CONF, $ALOG;
     $query = "DELETE
@@ -910,7 +987,7 @@ function getAlldblBookings($id){
 }
 function getDBLbooking_co($id){
   global $CONN, $FUNC, $_CONF, $ALOG;
-    $query="SELECT *,'0' as price FROM cms_booking_dbl WHERE booking_master_id=".$id;
+    $query="SELECT *,'0' as price,'0' as left_amo FROM cms_booking_dbl WHERE booking_master_id=".$id;
     $day = $CONN->Execute($query) or $FUNC->ServerError(__FILE__, __LINE__, $CONN->ErrorMsg());
     return $day->fields;
 }

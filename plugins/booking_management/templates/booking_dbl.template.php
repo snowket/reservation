@@ -149,6 +149,7 @@ input[type='radio']:after {
 		width:172px;
 	}
 </style>
+
 <form method="post" action="index.php?m=booking_management&amp;tab=booking_dbl" id="booking_form">
 <input type="hidden" name="action" value="save_booking">
 
@@ -174,7 +175,7 @@ input[type='radio']:after {
 						<span class="text">დამკვეთი</span>
 					</td>
 					<td>
-						<select name="" id="guest_type_select" class="select ">
+						<select name="guest_t" id="guest_type_select" class="select ">
 							            <option value="tour-company">ტურ ოპერატორი</option>
 										<option value="non-corporate">ფიზიკური პირი</option>
 										<option value="company">კომპანია</option>
@@ -203,7 +204,7 @@ input[type='radio']:after {
 									<span class="text">კომპანიის ID </span>
 								</td>
 								<td>
-									<input type="number" name="co_number" class="" required="" value="<?=$guest['id_number']?>">
+									<input type="number" name="co_number" class=""  value="<?=$guest['id_number']?>">
 								</td>
 							</tr>
 						</table>
@@ -1394,16 +1395,18 @@ input[type='radio']:after {
 	}
 
 	    function getRoomPrice(room_id,day,callback){
-	      $.ajax({
+        $.ajax({
 	         type: "GET",
 	         url:"index_ajax.php",
 	         data: {'cmd':'get_room_price','day':day,'room_id':room_id},
 	         dataType: 'json',
 	         async: false,
 	         success: function(message){
+             localStorage.setItem("key", "value");
 	            callback(message);
 	        }
 	       });
+
 	    }
 
 	    var guest_net_price = 0;

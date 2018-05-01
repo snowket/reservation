@@ -157,7 +157,7 @@
                 <div class="fill_guest_balance_trigger" guest_id="<?=$guest_state['id']?>" style="cursor:pointer; float: left" title="<?=$TEXT['guests_financial_state']['add_balance']?>">
                     <img src="./images/icos16/money-add.png" width="16" height="16" border="0" align="middle" alt="Fill Balance">
                 </div>
-                <a href="index.php?m=booking_management&tab=booking_list&guest_id=<?=$guest_state['guest_id_number']?>&guest_name=<?=$guest_state['first_name']?><?=($guest_state['last_name'])?' '.$guest_state['last_name']:''?>" style="float:left; margin-left: 10px;" title="<?=$TEXT['guests_financial_state']['show_all_bookings']?>">
+                <a href="index.php?m=booking_management&tab=booking_list&appro=1&guest_id=<?=$guest_state['guest_id_number']?>&guest_name=<?=$guest_state['first_name']?><?=($guest_state['last_name'])?' '.$guest_state['last_name']:''?>" style="float:left; margin-left: 10px;" title="<?=$TEXT['guests_financial_state']['show_all_bookings']?>">
                     <img src="./images/icos16/booking_bell.gif" width="16" height="16" border="0" align="middle" alt="show all bookings">
                 </a>
             </td>

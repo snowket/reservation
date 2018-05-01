@@ -322,16 +322,26 @@ function archiveBooking($booking_id,$setoption=0,$booking_type=false,$comment=''
 }
 
 
-function getJoinedBookings($where_clause = '',$order_clause = '')
+function getJoinedBookings($where_clause = '',$order_clause = '',$ref=0)
 {
     global $CONN, $FUNC, $_CONF, $pageBar, $SELF_FILTERED;
-    $query = "SELECT B.*,R.floor, G.id_number AS guest_id_number,G.type, G.first_name, G.last_name
-              FROM {$_CONF['db']['prefix']}_booking AS B
-              LEFT JOIN {$_CONF['db']['prefix']}_guests AS G
-              ON B.guest_id=G.id
-              LEFT JOIN {$_CONF['db']['prefix']}_rooms AS R
-              ON B.room_id=R.id
-              WHERE 1=1 AND dbl_res!=1 " . $where_clause." ".$order_clause;
+    if($ref){
+      $query = "SELECT B.*,R.floor, G.id_number AS guest_id_number,G.type, G.first_name, G.last_name
+                FROM {$_CONF['db']['prefix']}_booking AS B
+                LEFT JOIN {$_CONF['db']['prefix']}_guests AS G
+                ON B.guest_id=G.id
+                LEFT JOIN {$_CONF['db']['prefix']}_rooms AS R
+                ON B.room_id=R.id
+                WHERE 1=1 " . $where_clause." ".$order_clause;
+    }else{
+      $query = "SELECT B.*,R.floor, G.id_number AS guest_id_number,G.type, G.first_name, G.last_name
+                FROM {$_CONF['db']['prefix']}_booking AS B
+                LEFT JOIN {$_CONF['db']['prefix']}_guests AS G
+                ON B.guest_id=G.id
+                LEFT JOIN {$_CONF['db']['prefix']}_rooms AS R
+                ON B.room_id=R.id
+                WHERE 1=1 AND dbl_res!=1 " . $where_clause." ".$order_clause;
+    }
     if ($_POST['action'] == 'get_excel') {
         $bookings = $CONN->Execute($query) or $FUNC->ServerError(__FILE__, __LINE__, $CONN->ErrorMsg());
     } else {
@@ -354,7 +364,7 @@ function getDblJoinedBookings($where_clause = '',$order_clause = '')
     if ($_POST['action'] == 'get_excel') {
         $bookings = $CONN->Execute($query) or $FUNC->ServerError(__FILE__, __LINE__, $CONN->ErrorMsg());
     } else {
-        $bookings = $CONN->PageExecute($query, 50, $_GET['p']) or $FUNC->ServerError(__FILE__, __LINE__, $CONN->ErrorMsg());
+        $bookings = $CONN->Execute($query) or $FUNC->ServerError(__FILE__, __LINE__, $CONN->ErrorMsg());
         $pageBar = $FUNC->DrawPageBar_($SELF_FILTERED . "&p=", $bookings);
     }
     return $bookings->getRows();
@@ -462,6 +472,16 @@ function getBookingTransactions($booking_id)
     $transactions = $result->GetRows();
     return $transactions;
 }
+function getBookingTransactionsD($booking_id)
+{
+    global $CONN, $FUNC, $_CONF;
+    $query = "SELECT id,administrator_id,amount, start_date,destination,payment_method_id
+              FROM {$_CONF['db']['prefix']}_booking_transactions
+              WHERE booking_id =" . $booking_id . " AND result='OK'";
+    $result = $CONN->Execute($query) or $FUNC->ServerError(__FILE__, __LINE__, $CONN->ErrorMsg());
+    $transactions = $result->GetRows();
+    return $transactions;
+}
 
 function getGuestTransactions($guest_id)
 {
@@ -493,7 +513,6 @@ function addBookingTransaction($type, $guest_id, $booking_id, $administrator_id,
                     result='OK',
                     postback_message='',
                     user_ip='" . $_SERVER['REMOTE_ADDR'] . "'";
-
     $result = $CONN->Execute($query) or $FUNC->ServerError(__FILE__, __LINE__, $CONN->ErrorMsg());
     $transaction_id=(int)$CONN->Insert_ID();
     updateBookingFinances($booking_id);
@@ -679,6 +698,16 @@ function updateGuestBalance($guest_id, $amount)
     global $CONN, $FUNC, $_CONF, $ALOG;
     $query = "UPDATE {$_CONF['db']['prefix']}_guests SET
 			 	 balance={$amount}
+			 	 WHERE id={$guest_id}";
+    $result = $CONN->Execute($query) or $FUNC->ServerError(__FILE__, __LINE__, $CONN->ErrorMsg());
+    $ALOG->addActivityLog("Update Guest Balane", "Administrator Updated Guest[".$guest_id."] Balance=".$amount, $_SESSION['pcms_user_id'], "");
+    return $result;
+}
+function updateGuestBalanceD($guest_id, $amount)
+{
+    global $CONN, $FUNC, $_CONF, $ALOG;
+    $query = "UPDATE {$_CONF['db']['prefix']}_guests SET
+			 	 balance=balance + {$amount}
 			 	 WHERE id={$guest_id}";
     $result = $CONN->Execute($query) or $FUNC->ServerError(__FILE__, __LINE__, $CONN->ErrorMsg());
     $ALOG->addActivityLog("Update Guest Balane", "Administrator Updated Guest[".$guest_id."] Balance=".$amount, $_SESSION['pcms_user_id'], "");

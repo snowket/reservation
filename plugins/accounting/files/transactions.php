@@ -22,7 +22,9 @@ $joinedTransactions=getJoinedAllBookingTransactions($where_clause);
 
 $paymentMethods=getAllPaymentMethods();
 $administrators=getAllUsers(array('id', 'login', 'firstname', 'lastname'));
-
+foreach ($joinedTransactions as $key => $value) {
+  $joinedTransactions[$key]['bb']=getBookingById($value['booking_id']);
+}
 if ($_POST['action'] == 'get_excel') {
     require_once('classes/PHPExcel/PHPExcel.php');
     require_once('classes/PHPExcel/PHPExcel/Writer/Excel5.php');
@@ -49,38 +51,50 @@ if ($_POST['action'] == 'get_excel') {
     $sheet->getStyle('C1')->getFont()->getColor()->applyFromArray(array('rgb' => 'FFFFFF'));
     $sheet->getColumnDimension('C')->setAutoSize(true);
 
-    $sheet->setCellValue("D1", $TEXT['transactions']['room']);
+    $sheet->setCellValue("D1",$TEXT['booking_list']['check_in']);
     $sheet->getStyle('D1')->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID);
     $sheet->getStyle('D1')->getFill()->getStartColor()->setRGB('3a82cc');
     $sheet->getStyle('D1')->getFont()->getColor()->applyFromArray(array('rgb' => 'FFFFFF'));
     $sheet->getColumnDimension('D')->setAutoSize(true);
 
-    $sheet->setCellValue("E1", $TEXT['transactions']['method']);
+    $sheet->setCellValue("E1", $TEXT['booking_list']['check_out']);
     $sheet->getStyle('E1')->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID);
     $sheet->getStyle('E1')->getFill()->getStartColor()->setRGB('3a82cc');
     $sheet->getStyle('E1')->getFont()->getColor()->applyFromArray(array('rgb' => 'FFFFFF'));
     $sheet->getColumnDimension('E')->setAutoSize(true);
 
-    $sheet->setCellValue("F1", $TEXT['transactions']['tax']);
+    $sheet->setCellValue("F1", $TEXT['transactions']['room']);
     $sheet->getStyle('F1')->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID);
     $sheet->getStyle('F1')->getFill()->getStartColor()->setRGB('3a82cc');
     $sheet->getStyle('F1')->getFont()->getColor()->applyFromArray(array('rgb' => 'FFFFFF'));
     $sheet->getColumnDimension('F')->setAutoSize(true);
 
-    $sheet->setCellValue("G1", $TEXT['transactions']['debit']);
+    $sheet->setCellValue("G1", $TEXT['transactions']['method']);
     $sheet->getStyle('G1')->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID);
     $sheet->getStyle('G1')->getFill()->getStartColor()->setRGB('3a82cc');
     $sheet->getStyle('G1')->getFont()->getColor()->applyFromArray(array('rgb' => 'FFFFFF'));
     $sheet->getColumnDimension('G')->setAutoSize(true);
 
-    $sheet->setCellValue("H1", $TEXT['transactions']['credit']);
+    $sheet->setCellValue("H1", $TEXT['transactions']['tax']);
     $sheet->getStyle('H1')->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID);
     $sheet->getStyle('H1')->getFill()->getStartColor()->setRGB('3a82cc');
     $sheet->getStyle('H1')->getFont()->getColor()->applyFromArray(array('rgb' => 'FFFFFF'));
     $sheet->getColumnDimension('H')->setAutoSize(true);
 
-    $sheet->getStyle('A1:H1')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-    $sheet->getColumnDimension('A:H')->setAutoSize(true);
+    $sheet->setCellValue("I1", $TEXT['transactions']['debit']);
+    $sheet->getStyle('I1')->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID);
+    $sheet->getStyle('I1')->getFill()->getStartColor()->setRGB('3a82cc');
+    $sheet->getStyle('I1')->getFont()->getColor()->applyFromArray(array('rgb' => 'FFFFFF'));
+    $sheet->getColumnDimension('I')->setAutoSize(true);
+
+    $sheet->setCellValue("J1", $TEXT['transactions']['credit']);
+    $sheet->getStyle('J1')->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID);
+    $sheet->getStyle('J1')->getFill()->getStartColor()->setRGB('3a82cc');
+    $sheet->getStyle('J1')->getFont()->getColor()->applyFromArray(array('rgb' => 'FFFFFF'));
+    $sheet->getColumnDimension('J')->setAutoSize(true);
+
+    $sheet->getStyle('A1:J1')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    $sheet->getColumnDimension('A:J')->setAutoSize(true);
 
     for ($i = 0; $i < count($joinedTransactions); $i++) {
         $firstname = $joinedTransactions[$i]['first_name'];
@@ -98,15 +112,16 @@ if ($_POST['action'] == 'get_excel') {
         $credit = ($amount<0)?$amount:0;
         $R_name = $joinedTransactions[$i]['R_name'];
         $floor = $joinedTransactions[$i]['floor'];
-
         $sheet->setCellValueByColumnAndRow(0, $i +2, $guest);
         $sheet->setCellValueByColumnAndRow(1, $i +2, $administrator);
         $sheet->setCellValueByColumnAndRow(2, $i +2, $date);
-        $sheet->setCellValueByColumnAndRow(3, $i +2, $R_name." Floor(".$floor.")");
-        $sheet->setCellValueByColumnAndRow(4, $i +2, $payment_method);
-        $sheet->setCellValueByColumnAndRow(5, $i +2, $tax);
-        $sheet->setCellValueByColumnAndRow(6, $i +2, $debit);
-        $sheet->setCellValueByColumnAndRow(7, $i +2, $credit);
+        $sheet->setCellValueByColumnAndRow(3, $i +2, date('Y-m-d', strtotime($joinedTransactions[$i]['bb']['check_in'])) );
+        $sheet->setCellValueByColumnAndRow(4, $i +2, date('Y-m-d', strtotime($joinedTransactions[$i]['bb']['check_out'])) );
+        $sheet->setCellValueByColumnAndRow(5, $i +2, $R_name." Floor(".$floor.")");
+        $sheet->setCellValueByColumnAndRow(6, $i +2, $payment_method);
+        $sheet->setCellValueByColumnAndRow(7, $i +2, $tax);
+        $sheet->setCellValueByColumnAndRow(8, $i +2, $debit);
+        $sheet->setCellValueByColumnAndRow(9, $i +2, $credit);
     }
     header ( "Expires: Mon, 1 Apr 1974 05:00:00 GMT" );
     header ( "Last-Modified: " . gmdate("D,d M YH:i:s") . " GMT" );
@@ -119,9 +134,7 @@ if ($_POST['action'] == 'get_excel') {
     $objWriter->save('php://output');
 
 }
-foreach ($joinedTransactions as $key => $value) {
-  $joinedTransactions[$key]['bb']=getBookingById($value['booking_id']);
-}
+
 $TMPL->addVar('TMPL_guests', getAllGuests());
 $TMPL->addVar("TMPL_payment_methods", $paymentMethods);
 $TMPL->addVar("TMPL_administrators", $administrators);

@@ -747,6 +747,10 @@
         <td><div id="tt_guest"></div></td>
     </tr>
     <tr>
+        <td align="right"><?=$TEXT['plate_tooltip']['guests']?></td>
+        <td><div id="tt_guests"></div></td>
+    </tr>
+    <tr>
         <td align="right"><?=$TEXT['plate_tooltip']['responsive_guest']?></td>
         <td><div id="tt_responsive_guest"></div></td>
     </tr>
@@ -1231,6 +1235,7 @@ function info_toggle(elem){
             }
                $('#tt_id').text(msg.id);
                $('#tt_guest').html(msg.guest.name);
+               $('#tt_guests').html(msg.guests.text);
                $('#tt_checkin_checkout').html(msg.check_in+' / '+msg.check_out);
                $('#tt_affiliate').html(msg.affiliate.name);
                $('#tt_guests_count').html(msg.adult_num+'/'+msg.child_num);

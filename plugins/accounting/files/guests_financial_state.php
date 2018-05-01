@@ -10,33 +10,9 @@ $where_clause = "";
 $guest_tax = (int)$_GET['tax'];
 (isset($_GET['tax']) && $guest_tax != 2) ? $where_clause .= " AND G.tax=" . $guest_tax : $where_clause .= '';
 
-/*
-$query = "SELECT G.id, G.id_number AS guest_id_number,G.type,G.tax, G.first_name, G.last_name,G.balance, B.guest_id AS guest_id,B.paid_amount as debit,B.accommodation_price as credit
-          FROM cms_guests AS G
-            LEFT JOIN cms_booking AS B
-              ON G.id=B.guest_id
-          WHERE 1=1 AND CONCAT(G.first_name, ' ', G.last_name ) LIKE '%შუქურა %'";
-$result = $CONN->Execute($query) or $FUNC->ServerError(__FILE__, __LINE__, mysql_error());
-$results = $result->getRows();
-p($results);
-$query = "
-          SELECT G.id, G.id_number AS guest_id_number,G.type,G.tax, G.first_name, G.last_name,G.balance, B.responsive_guest_id AS guest_id,B.services_paid_amount as debit,B.services_price as credit
-          FROM cms_guests AS G
-            LEFT JOIN cms_booking AS B
-              ON G.id=B.responsive_guest_id
-          WHERE 1=1 AND CONCAT(G.first_name, ' ', G.last_name ) LIKE '%შუქურა %'";
-$result = $CONN->Execute($query) or $FUNC->ServerError(__FILE__, __LINE__, mysql_error());
-$results = $result->getRows();
-p($results);
-$query = "
-          SELECT G.id, G.id_number AS guest_id_number,G.type,G.tax, G.first_name, G.last_name,G.balance, G.id AS guest_id,0 as debit,0 as credit
-          FROM cms_guests AS G
-          WHERE 1=1 AND CONCAT(G.first_name, ' ', G.last_name ) LIKE '%შუქურა %'";
-$result = $CONN->Execute($query) or $FUNC->ServerError(__FILE__, __LINE__, mysql_error());
-$results = $result->getRows();
-p($results);
-*/
+
 $guestsBookingsSummaryState = getGuestsBookingsSummaryState($where_clause,(int)$_GET['total_unpaid']);
+
 
 $paymentMethods = getAllPaymentMethods();
 $guests=getAllGuests();
@@ -153,5 +129,3 @@ $TMPL->addVar('TMPL_guestsBookingsSummaryState', $guestsBookingsSummaryState);
 $TMPL->addVar("TMPL_navbar", $pageBar);
 $TMPL->addVar("TMPL_settings",array('page_num'=>50));
 $TMPL->ParseIntoVar($_CENTER, "guests_financial_state");
-
-
